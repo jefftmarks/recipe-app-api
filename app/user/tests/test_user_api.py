@@ -12,10 +12,11 @@ CREATE_USER_URL = reverse('user:create')
 USER_DETAILS = {
     'email': 'test@example.com',
     'password': 'testpass123',
-    'name': 'Test Name',  
+    'name': 'Test Name',
 }
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
+
 
 def create_user(**params):
     """Create and return a new user."""
@@ -41,7 +42,7 @@ class PublicUserApiTests(TestCase):
         """Test error returned if use rwith email exists."""
         create_user(**USER_DETAILS)
         res = self.client.post(CREATE_USER_URL, USER_DETAILS)
-        
+
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_password_too_short_error(self):
@@ -49,10 +50,10 @@ class PublicUserApiTests(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'tpw',
-            'name': 'Test Name',    
+            'name': 'Test Name',
         }
         res = self.client.post(CREATE_USER_URL, payload)
-        
+
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         user_exists = get_user_model().objects.filter(
             email=USER_DETAILS['email']
@@ -97,14 +98,14 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    
+
 class PrivateUserApiTests(TestCase):
     """Test API requests that require authentication."""
     def setUp(self):
         self.user=create_user(**USER_DETAILS)
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-    
+
     def test_retrieve_profile_succes(self):
         """Test retrieving profile for logged in user."""
         res = self.client.get(ME_URL)

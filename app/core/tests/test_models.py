@@ -1,24 +1,27 @@
 """
 Tests for models.
 """
+from decimal import Decimal
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+from core import models
+
+USER_DETAILS = {
+    'email': 'test@example.com',
+    'password':'testpass123'
+}
 
 class ModelTests(TestCase):
     """Test models."""
 
     def test_create_user_with_email_successful(self):
         """Test creating a user when an email is successful"""
-        email = 'test@example.com'
-        password = 'testpass123'
-        user = get_user_model().objects.create_user(
-            email=email,
-            password=password
-        )
+        user = get_user_model().objects.create_user(**USER_DETAILS)
 
-        self.assertEqual(user.email, email)
-        self.assertTrue(user.check_password(password))
+        self.assertEqual(user.email, USER_DETAILS['email'])
+        self.assertTrue(user.check_password(USER_DETAILS['password']))
 
     def test_new_user_email_normalize(self):
         """Test email is normalized for new users."""
@@ -40,10 +43,20 @@ class ModelTests(TestCase):
 
     def test_create_superusers(self):
         """Test creating a superusers."""
-        user = get_user_model().objects.create_superuser(
-            'test@example.com',
-            'test123',
-        )
+        user = get_user_model().objects.create_superuser(**USER_DETAILS)
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_recipe(self):
+        """Test creating a recipe is successful."""
+        user = get_user_model().objects.create_user(**USER_DETAILS)
+        recipe = models.Recipe.objects.create(
+            user=user,
+            title='Sample Recipe Name',
+            time_minutes=5,
+            price=Decimal('5.50'),
+            description='Sample recipe description',
+        )
+
+        self.assertEqual(str(recipe), recipe.title)
